@@ -16,6 +16,10 @@
     }
   ],
   "action": {
-    "default_title": "Instagram Detox"
-  }
+    "default_title": "Instagram Detox",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage"
+  ]
 }

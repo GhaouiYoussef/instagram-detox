@@ -1,6 +1,11 @@
 (function () {
-  const USE_XPATH = true; // set to false if XPath becomes brittle
-  const DEBUG = false; // set to true to log matches
+  // Defaults; can be overridden via chrome.storage (popup)
+  let SETTINGS = {
+    hideStories: true,
+    hideNotes: true,
+    useXPath: true,
+    debugMode: false,
+  };
   const HIDDEN_ATTR = 'data-ig-detox-hidden';
 
   // Story + Notes selectors (safe, narrow where possible)
@@ -25,24 +30,44 @@
     "/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div/section/div/div/div/div[1]/div[1]/div/div[4]/div[1]"
   ];
 
+  function debug(...args) { if (SETTINGS.debugMode) console.log('[IG-Detox]', ...args); }
+
   function hideElement(el) {
     if (!el || el.hasAttribute(HIDDEN_ATTR)) return;
     const tag = (el.tagName || '').toUpperCase();
     if (tag === 'BODY' || tag === 'HTML' || tag === 'MAIN') return; // never hide containers that hold the entire page/feed
     el.style.display = 'none';
     el.setAttribute(HIDDEN_ATTR, 'true');
-    if (DEBUG) console.log('[IG-Detox] Hidden:', el);
+    debug('Hidden:', el);
+  }
+
+  function unhideAll() {
+    document.querySelectorAll('[' + HIDDEN_ATTR + ']').forEach((el) => {
+      el.style.display = '';
+      el.removeAttribute(HIDDEN_ATTR);
+    });
   }
 
   function findStoriesContainers(root = document) {
     const found = new Set();
 
+    // Apply attribute flags for CSS-scoped rules
+    document.documentElement.setAttribute('data-ig-detox-stories', SETTINGS.hideStories ? 'true' : 'false');
+    document.documentElement.setAttribute('data-ig-detox-notes', SETTINGS.hideNotes ? 'true' : 'false');
+
     for (const sel of selectors) {
       try {
-        root.querySelectorAll(sel).forEach((node) => {
-          hideElement(node);
-          found.add(node);
-        });
+        // Only apply the CSS-like hides via JS if they correspond to enabled categories
+        const isStorySel = sel.includes('stories') || sel.includes('/stories/');
+        const isNotesSel = sel.includes('Notes') || sel.includes('aria-label');
+        if ((isStorySel && !SETTINGS.hideStories) || (isNotesSel && !SETTINGS.hideNotes)) {
+          // skip
+        } else {
+          root.querySelectorAll(sel).forEach((node) => {
+            hideElement(node);
+            found.add(node);
+          });
+        }
       } catch (e) {
         // ignore invalid selector on older engines
       }
@@ -51,15 +76,15 @@
     // Removed broad heuristic that could hide too much content
 
       // Try XPath-based matching from user-provided structure
-      if (USE_XPATH) {
+      if (SETTINGS.useXPath) {
         for (const xp of xpaths) {
           try {
             const res = document.evaluate(xp, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
             const node = res.singleNodeValue;
-            if (node) {
+            if (node && SETTINGS.hideStories) {
               hideElement(node);
               found.add(node);
-              if (DEBUG) console.log('[IG-Detox] XPath matched:', xp, node);
+              debug('XPath matched (stories):', xp, node);
             }
           } catch (e) {
             // ignore XPath issues
@@ -70,10 +95,10 @@
           try {
             const res = document.evaluate(xp, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
             const node = res.singleNodeValue;
-            if (node) {
+            if (node && SETTINGS.hideNotes) {
               hideElement(node);
               found.add(node);
-              if (DEBUG) console.log('[IG-Detox] Notes XPath matched:', xp, node);
+              debug('XPath matched (notes):', xp, node);
             }
           } catch (e) {
             // ignore XPath issues
@@ -118,6 +143,40 @@
     }
   }, 800);
 
-  // Initial pass
-  run();
+  // Settings management
+  function loadSettingsAndRun() {
+    try {
+      chrome.storage.sync.get(['hideStories','hideNotes','useXPath','debugMode'], (res) => {
+        SETTINGS = {
+          hideStories: res.hideStories ?? SETTINGS.hideStories,
+          hideNotes: res.hideNotes ?? SETTINGS.hideNotes,
+          useXPath: res.useXPath ?? SETTINGS.useXPath,
+          debugMode: res.debugMode ?? SETTINGS.debugMode,
+        };
+        // Reset prior inline hides if a feature was turned off
+        unhideAll();
+        run();
+      });
+    } catch (e) {
+      // If chrome.storage is unavailable, proceed with defaults
+      run();
+    }
+  }
+
+  try {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'sync') return;
+      let changed = false;
+      for (const k of ['hideStories','hideNotes','useXPath','debugMode']) {
+        if (k in changes) { SETTINGS[k] = changes[k].newValue; changed = true; }
+      }
+      if (changed) {
+        unhideAll();
+        schedule();
+      }
+    });
+  } catch (e) {}
+
+  // Initial pass (with settings)
+  loadSettingsAndRun();
 })();

@@ -1,6 +1,6 @@
-# Instagram Detox — Hide Stories
+# Instagram Detox — Hide Stories & Notes
 
-Removes the Stories section from Instagram on desktop using a lightweight Chrome extension.
+Removes Instagram Stories and Notes on desktop with a lightweight Chrome extension. Includes a popup to toggle each feature.
 
 ## Install (Unpacked)
 
@@ -12,18 +12,19 @@ Removes the Stories section from Instagram on desktop using a lightweight Chrome
 
 ## How It Works
 
-- Content CSS hides likely Stories containers via accessible labels and structure.
-- A MutationObserver watches DOM changes and hides Stories if Instagram updates the layout dynamically.
+- CSS rules are scoped behind HTML attributes set by the script, enabling toggling without reloading CSS.
+- A MutationObserver watches DOM changes and re-applies hides if Instagram updates the layout dynamically.
 
 ## Files
 
 - `manifest.json`: Chrome extension manifest (MV3).
-- `content-script.js`: JS that detects and hides the Stories tray, including SPA navigations.
-- `styles.css`: CSS selectors to hide Stories where possible without JS.
+- `content-script.js`: Detects and hides Stories/Notes, handles SPA navigations, reads settings from `chrome.storage`.
+- `styles.css`: Attribute-scoped CSS that hides elements only when toggles are enabled.
+- `popup.html` / `popup.js`: Popup UI to toggle Stories, Notes, XPath fallback, and debug logs.
 
 ## Permissions
 
-No extra permissions beyond content script matching are used.
+- `storage`: to persist toggle settings from the popup.
 
 ## Troubleshooting
 
@@ -34,10 +35,16 @@ No extra permissions beyond content script matching are used.
 ## Notes
 
 - Targets: `https://www.instagram.com/*`, `https://instagram.com/*`, `https://m.instagram.com/*`.
-- Tested in modern Chrome; uses `:has()` in CSS where available. JS provides fallback.
+- Tested in modern Chrome; uses `:has()` in CSS where available. JS + XPath fallback provide resilience.
 
-# key
-**Hardening added**
+## Popup Toggles
 
-- USE_XPATH flag: If Instagram changes and the absolute XPath starts misfiring, set USE_XPATH = false at the top of content-script.js.
-- DEBUG flag: Set DEBUG = true to log exactly which node was hidden for quick verification.
+- Hide Stories: Enables/disables hiding the stories tray.
+- Hide Notes: Enables/disables hiding the notes panel.
+- Use XPath fallback: Uses XPath targets for stubborn layouts.
+- Debug logs: Logs matched elements and actions to the DevTools console.
+
+## Advanced
+
+- Settings live in `chrome.storage.sync` and apply across Chrome profiles where sync is enabled.
+- Content script avoids hiding `HTML`, `BODY`, and `MAIN` to prevent over-hiding.

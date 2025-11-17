@@ -1,19 +1,13 @@
-/* Hide likely Stories containers via accessible labels or structure */
-[aria-label="Stories"],
-[aria-label="stories" i] {
-  display: none !important;
-}
+/* Attribute-scoped to allow popup toggling */
+html[data-ig-detox-stories="true"] [aria-label="Stories"],
+html[data-ig-detox-stories="true"] [aria-label="stories" i] { display: none !important; }
 
-/* Hide Notes region when labeled accessibly */
-[aria-label="Notes"],
-[role="region"][aria-label="Notes"] {
-  display: none !important;
-}
+/* Hide sections that contain lists of story links (if stories enabled) */
+html[data-ig-detox-stories="true"] section:has(ul li a[href^="/stories/"]) { display: none !important; }
 
-/* Hide sections that contain lists of story links */
-section:has(ul li a[href^="/stories/"]) {
-  display: none !important;
-}
+/* Notes (attribute-scoped) */
+html[data-ig-detox-notes="true"] [aria-label="Notes"],
+html[data-ig-detox-notes="true"] [role="region"][aria-label="Notes"] { display: none !important; }
 
 /* Conservative generic hide if the first section under main looks like stories */
 main > section:has(ul li a[role="link"]) {
