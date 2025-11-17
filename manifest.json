@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Instagram Detox — Hide Stories",
+  "version": "1.0.0",
+  "description": "Removes the Stories section from Instagram on desktop.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.instagram.com/*",
+        "https://instagram.com/*",
+        "https://m.instagram.com/*"
+      ],
+      "js": ["content-script.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Instagram Detox"
+  }
+}
