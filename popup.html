@@ -5,34 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Instagram Detox</title>
     <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 12px; width: 260px; }
-      h1 { font-size: 14px; margin: 0 0 8px; }
-      .row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; }
-      label { font-size: 13px; }
-      .hint { color: #666; font-size: 11px; margin-top: 8px; }
-      hr { border: none; border-top: 1px solid #e5e5e5; margin: 8px 0; }
+      * { box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        margin: 0;
+        padding: 16px;
+        width: 320px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 16px;
+        text-align: center;
+        letter-spacing: 0.3px;
+      }
+      .section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .section-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #667eea;
+        margin: 0 0 10px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+      }
+      .row:not(:last-child) {
+        border-bottom: 1px solid #f0f0f0;
+      }
+      label {
+        font-size: 14px;
+        color: #2d3748;
+        cursor: pointer;
+        user-select: none;
+        flex: 1;
+      }
+      /* Custom toggle switch */
+      input[type="checkbox"] {
+        appearance: none;
+        width: 44px;
+        height: 24px;
+        background: #cbd5e0;
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        flex-shrink: 0;
+      }
+      input[type="checkbox"]::before {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: white;
+        top: 3px;
+        left: 3px;
+        transition: transform 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      input[type="checkbox"]:checked {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      input[type="checkbox"]:checked::before {
+        transform: translateX(20px);
+      }
+      input[type="checkbox"]:hover {
+        opacity: 0.9;
+      }
+      .hint {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        font-size: 11px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-align: center;
+        line-height: 1.4;
+        margin-top: 4px;
+      }
+      .hint::before {
+        content: '💡 ';
+      }
     </style>
   </head>
   <body>
     <h1>Instagram Detox</h1>
-    <div class="row">
-      <label for="hideStories">Hide Stories</label>
-      <input type="checkbox" id="hideStories" />
+    
+    <div class="section">
+      <div class="section-title">Content Filters</div>
+      <div class="row">
+        <label for="hideStories">Hide Stories</label>
+        <input type="checkbox" id="hideStories" />
+      </div>
+      <div class="row">
+        <label for="hideNotes">Hide Notes</label>
+        <input type="checkbox" id="hideNotes" />
+      </div>
+      <div class="row">
+        <label for="hideSuggestions">Hide Suggestions</label>
+        <input type="checkbox" id="hideSuggestions" />
+      </div>
     </div>
-    <div class="row">
-      <label for="hideNotes">Hide Notes</label>
-      <input type="checkbox" id="hideNotes" />
+
+    <div class="section">
+      <div class="section-title">Advanced</div>
+      <div class="row">
+        <label for="useXPath">XPath Fallback</label>
+        <input type="checkbox" id="useXPath" />
+      </div>
+      <div class="row">
+        <label for="debugMode">Debug Logs</label>
+        <input type="checkbox" id="debugMode" />
+      </div>
     </div>
-    <hr />
-    <div class="row">
-      <label for="useXPath">Use XPath fallback</label>
-      <input type="checkbox" id="useXPath" />
-    </div>
-    <div class="row">
-      <label for="debugMode">Debug logs</label>
-      <input type="checkbox" id="debugMode" />
-    </div>
-    <div class="hint">Changes apply on next navigation or refresh.</div>
+
+    <div class="hint">Changes apply on next navigation or refresh</div>
     <script src="popup.js"></script>
   </body>
 </html>
