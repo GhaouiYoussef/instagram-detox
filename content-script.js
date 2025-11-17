@@ -3,6 +3,7 @@
   let SETTINGS = {
     hideStories: true,
     hideNotes: true,
+    hideSuggestions: true,
     useXPath: true,
     debugMode: false,
   };
@@ -30,6 +31,11 @@
     "/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div/section/div/div/div/div[1]/div[1]/div/div[4]/div[1]"
   ];
 
+  // Profile suggestions (right sidebar) XPath provided by user
+  const xpathsSuggestions = [
+    "/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div[1]/div[2]/div"
+  ];
+
   function debug(...args) { if (SETTINGS.debugMode) console.log('[IG-Detox]', ...args); }
 
   function hideElement(el) {
@@ -54,13 +60,18 @@
     // Apply attribute flags for CSS-scoped rules
     document.documentElement.setAttribute('data-ig-detox-stories', SETTINGS.hideStories ? 'true' : 'false');
     document.documentElement.setAttribute('data-ig-detox-notes', SETTINGS.hideNotes ? 'true' : 'false');
+    document.documentElement.setAttribute('data-ig-detox-suggestions', SETTINGS.hideSuggestions ? 'true' : 'false');
 
     for (const sel of selectors) {
       try {
         // Only apply the CSS-like hides via JS if they correspond to enabled categories
-        const isStorySel = sel.includes('stories') || sel.includes('/stories/');
-        const isNotesSel = sel.includes('Notes') || sel.includes('aria-label');
-        if ((isStorySel && !SETTINGS.hideStories) || (isNotesSel && !SETTINGS.hideNotes)) {
+        const lower = sel.toLowerCase();
+        const isStorySel = lower.includes('stories') || lower.includes('/stories/');
+        const isNotesSel = lower.includes('notes');
+        const isSuggestionsSel = lower.includes('suggest');
+        if ((isStorySel && !SETTINGS.hideStories) ||
+            (isNotesSel && !SETTINGS.hideNotes) ||
+            (isSuggestionsSel && !SETTINGS.hideSuggestions)) {
           // skip
         } else {
           root.querySelectorAll(sel).forEach((node) => {
@@ -99,6 +110,20 @@
               hideElement(node);
               found.add(node);
               debug('XPath matched (notes):', xp, node);
+            }
+          } catch (e) {
+            // ignore XPath issues
+          }
+        }
+        // Suggestions XPath fallback(s)
+        for (const xp of xpathsSuggestions) {
+          try {
+            const res = document.evaluate(xp, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+            const node = res.singleNodeValue;
+            if (node && SETTINGS.hideSuggestions) {
+              hideElement(node);
+              found.add(node);
+              debug('XPath matched (suggestions):', xp, node);
             }
           } catch (e) {
             // ignore XPath issues
@@ -146,10 +171,11 @@
   // Settings management
   function loadSettingsAndRun() {
     try {
-      chrome.storage.sync.get(['hideStories','hideNotes','useXPath','debugMode'], (res) => {
+      chrome.storage.sync.get(['hideStories','hideNotes','hideSuggestions','useXPath','debugMode'], (res) => {
         SETTINGS = {
           hideStories: res.hideStories ?? SETTINGS.hideStories,
           hideNotes: res.hideNotes ?? SETTINGS.hideNotes,
+          hideSuggestions: res.hideSuggestions ?? SETTINGS.hideSuggestions,
           useXPath: res.useXPath ?? SETTINGS.useXPath,
           debugMode: res.debugMode ?? SETTINGS.debugMode,
         };
@@ -167,7 +193,7 @@
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== 'sync') return;
       let changed = false;
-      for (const k of ['hideStories','hideNotes','useXPath','debugMode']) {
+      for (const k of ['hideStories','hideNotes','hideSuggestions','useXPath','debugMode']) {
         if (k in changes) { SETTINGS[k] = changes[k].newValue; changed = true; }
       }
       if (changed) {

@@ -1,6 +1,6 @@
-# Instagram Detox — Hide Stories & Notes
+# Instagram Detox — Hide Stories, Notes & Suggestions
 
-Removes Instagram Stories and Notes on desktop with a lightweight Chrome extension. Includes a popup to toggle each feature.
+Removes Instagram Stories, Notes, and Profile Suggestions on desktop with a lightweight Chrome extension. Includes a popup to toggle each feature.
 
 ## Install (Unpacked)
 
@@ -20,7 +20,7 @@ Removes Instagram Stories and Notes on desktop with a lightweight Chrome extensi
 - `manifest.json`: Chrome extension manifest (MV3).
 - `content-script.js`: Detects and hides Stories/Notes, handles SPA navigations, reads settings from `chrome.storage`.
 - `styles.css`: Attribute-scoped CSS that hides elements only when toggles are enabled.
-- `popup.html` / `popup.js`: Popup UI to toggle Stories, Notes, XPath fallback, and debug logs.
+- `popup.html` / `popup.js`: Popup UI to toggle Stories, Notes, Suggestions, XPath fallback, and debug logs.
 
 ## Permissions
 
@@ -41,6 +41,7 @@ Removes Instagram Stories and Notes on desktop with a lightweight Chrome extensi
 
 - Hide Stories: Enables/disables hiding the stories tray.
 - Hide Notes: Enables/disables hiding the notes panel.
+- Hide Suggestions: Enables/disables hiding the right sidebar profile suggestions.
 - Use XPath fallback: Uses XPath targets for stubborn layouts.
 - Debug logs: Logs matched elements and actions to the DevTools console.
 

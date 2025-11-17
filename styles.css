@@ -9,6 +9,10 @@ html[data-ig-detox-stories="true"] section:has(ul li a[href^="/stories/"]) { dis
 html[data-ig-detox-notes="true"] [aria-label="Notes"],
 html[data-ig-detox-notes="true"] [role="region"][aria-label="Notes"] { display: none !important; }
 
+/* Suggestions (right sidebar) - scoped */
+html[data-ig-detox-suggestions="true"] [aria-label="Suggestions"],
+html[data-ig-detox-suggestions="true"] [role="complementary"][aria-label="Suggestions"] { display: none !important; }
+
 /* Conservative generic hide if the first section under main looks like stories */
 main > section:has(ul li a[role="link"]) {
   /* This may be too broad on future layouts; JS observer narrows it */
